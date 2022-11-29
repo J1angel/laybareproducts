@@ -22,6 +22,14 @@
       </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbars :objects.sync="objects"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-robot-angry</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
     <v-snackbars :objects.sync="objectss"  top right>
       <template v-slot:default="{ message }">
         <v-layout align-center pr-4>
@@ -48,6 +56,7 @@ export default {
         description:'',
         price:''
       },
+      objects:[],
       objectss:[]
     }
   },
@@ -65,6 +74,11 @@ export default {
     },
     addProduct(){
       ProductApi.addProduct(this.product).then(response => {
+        this.objectss.push({
+          message: response.data.message,
+          color:"green darken-2",
+          timeout:3000
+        })
         this.setProductsNew()
         this.dialog = false
       }).catch(error => {
