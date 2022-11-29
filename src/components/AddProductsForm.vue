@@ -22,11 +22,24 @@
       </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbars :objects.sync="objectss"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-hand-okay</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
   </div>
 </template>
 <script>
 import ProductApi from '@/apilinks/productsapi'
+import VSnackbars from "v-snackbars";
+import {mapActions} from 'vuex';
 export default {
+  components:{
+    "v-snackbars": VSnackbars,
+  },
   data(){
     return {
       dialog:false,
@@ -34,7 +47,8 @@ export default {
         name:'',
         description:'',
         price:''
-      }
+      },
+      objectss:[]
     }
   },
   mounted() {
@@ -43,15 +57,22 @@ export default {
     })
   },
   methods:{
+    ...mapActions({
+      setProductsNew: "products/setProductsNew",
+    }),
     showDialog(){
       this.dialog = true
     },
     addProduct(){
       ProductApi.addProduct(this.product).then(response => {
-        console.log(response)
+        this.setProductsNew()
         this.dialog = false
       }).catch(error => {
-        console.log(error)
+        this.objects.push({
+          message:error.response.data.message,
+          color:"red darken-4",
+          timeout:3000
+        })
       })
     }
   }

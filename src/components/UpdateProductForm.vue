@@ -21,16 +21,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbars :objects.sync="objects"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-robot-angry</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
+    <v-snackbars :objects.sync="objectss"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-hand-okay</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
   </div>
 </template>
 <script>
 import ProductApi from '@/apilinks/productsapi'
+import {mapActions} from 'vuex';
+import VSnackbars from "v-snackbars";
 export default {
   props:['product'],
+  components:{
+    "v-snackbars": VSnackbars,
+  },
   data(){
     return {
       dialog:false,
-      prod:this.product
+      prod:this.product,
+      objects:[],
+      objectss:[]
     }
   },
   mounted() {
@@ -39,15 +62,27 @@ export default {
     })
   },
   methods:{
+    ...mapActions({
+      setProductsNew: "products/setProductsNew",
+    }),
     showDialog(){
       this.dialog = true
     },
     updateProduct(){
      ProductApi.editProduct(this.prod).then(response => {
-        console.log(response)
+       this.objectss.push({
+         message: response.data.message,
+         color:"green darken-2",
+         timeout:3000
+       })
+       this.setProductsNew()
         this.dialog = false
       }).catch(error => {
-        console.log(error)
+       this.objects.push({
+         message:error.response.data.message,
+         color:"red darken-4",
+         timeout:3000
+       })
       })
     }
   }

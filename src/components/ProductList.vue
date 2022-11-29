@@ -62,6 +62,22 @@
     </template>
   </v-simple-table>
   <UpdateProductForm :product="product"></UpdateProductForm>
+    <v-snackbars :objects.sync="objects"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-robot-angry</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
+    <v-snackbars :objects.sync="objectss"  top right>
+      <template v-slot:default="{ message }">
+        <v-layout align-center pr-4>
+          <v-icon class="pr-3" dark large>mdi-hand-okay</v-icon>
+          {{ message }}
+        </v-layout>
+      </template>
+    </v-snackbars>
   </div>
 </template>
 <script>
@@ -69,27 +85,44 @@ import Popper from 'vue-popperjs';
 import 'vue-popperjs/dist/vue-popper.css';
 import UpdateProductForm from "@/components/UpdateProductForm";
 import ProductApi from '@/apilinks/productsapi';
+import {mapActions} from 'vuex';
+import VSnackbars from "v-snackbars";
 export default {
   props:['products'],
   components:{
     UpdateProductForm,
     "popper": Popper,
+    "v-snackbars": VSnackbars,
   },
   data(){
     return{
-      product:[]
+      product:[],
+      objects:[],
+      objectss:[]
     }
   },
   methods:{
+    ...mapActions({
+      setProductsNew: "products/setProductsNew",
+    }),
     showEditProduct(item){
       this.product = item
       this.$root.$emit('showEditDialog')
     },
     deleteProduct(item){
       ProductApi.deleteProduct(item).then(response => {
-        console.log(response)
+        this.setProductsNew()
+        this.objectss.push({
+          message: response.data.message,
+          color:"green darken-2",
+          timeout:3000
+        })
       }).catch(error => {
-        console.log(error)
+        this.objects.push({
+          message:error.response.data.message,
+          color:"red darken-4",
+          timeout:3000
+        })
       })
     }
   }
